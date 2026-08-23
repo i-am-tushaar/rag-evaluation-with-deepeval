@@ -1,137 +1,231 @@
 import os
+import re
+import glob
 
-from dotenv import load_dotenv
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
 
-from src.ingestion.data_ingestion import ingest_data
 
+# ============================================================
+# CONFIGURATION
+# ============================================================
 
-# Load environment variables
-load_dotenv()
-
-# Chroma database directory
+DATA_DIR = "data"
 DB_DIR = "chroma_store"
 
-# Hugging Face token
-HF_TOKEN = os.getenv("HF_TOKEN")
-
-# Embedding model
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
-# Chroma collection
 COLLECTION_NAME = "rag_documents"
 
+CHUNK_SIZE = 750
+CHUNK_OVERLAP = 100
 
-def create_embeddings():
-    """
-    Create the Hugging Face embedding model.
-    """
+TOP_K = 5
+
+
+# ============================================================
+# 1. LOAD
+# Read VTT transcripts and remove timestamps
+# ============================================================
+
+def load_transcripts():
+
+    documents = []
+
+    for path in glob.glob(f"{DATA_DIR}/*.vtt"):
+
+        lines = []
+
+        with open(path, "r", encoding="utf-8") as file:
+
+            for line in file:
+
+                line = line.strip()
+
+                # Remove empty lines, WEBVTT and timestamps
+                if not line or line == "WEBVTT" or "-->" in line:
+                    continue
+
+                lines.append(line)
+
+        text = " ".join(lines)
+
+        # Extract session number
+        match = re.search(r"Session[ _]*(\d+)", path)
+
+        session = match.group(1) if match else "unknown"
+
+        documents.append(
+            Document(
+                page_content=text,
+                metadata={
+                    "session": session,
+                    "source": path,
+                },
+            )
+        )
+
+    return documents
+
+
+# ============================================================
+# 2. BUILD
+# Create embeddings and Chroma vector store
+# ============================================================
+
+def load_store():
 
     embeddings = HuggingFaceEmbeddings(
         model_name=EMBEDDING_MODEL
     )
 
-    return embeddings
+    # If Chroma already exists, load it
+    if os.path.exists(DB_DIR):
 
+        return Chroma(
+            collection_name=COLLECTION_NAME,
+            persist_directory=DB_DIR,
+            embedding_function=embeddings,
+        )
 
-def create_vector_store(documents):
-    """
-    Create Chroma vector store and add document chunks.
-    """
+    # Otherwise load documents
+    documents = load_transcripts()
 
-    if not documents:
-        raise ValueError("No documents provided.")
+    # Create chunks
+    chunks = RecursiveCharacterTextSplitter(
+        chunk_size=CHUNK_SIZE,
+        chunk_overlap=CHUNK_OVERLAP,
+    ).split_documents(documents)
 
-    embeddings = create_embeddings()
+    print(f"Total chunks created: {len(chunks)}")
 
-    vector_store = Chroma(
+    # Create Chroma database
+    vector_store = Chroma.from_documents(
+        documents=chunks,
+        embedding=embeddings,
         collection_name=COLLECTION_NAME,
-        embedding_function=embeddings,
         persist_directory=DB_DIR,
     )
-
-    vector_store.add_documents(documents)
 
     return vector_store
 
 
-def retrieve_documents(vector_store, query, top_k=5):
-    """
-    Retrieve the top-k relevant document chunks.
-    """
+# ============================================================
+# 3. RETRIEVER
+# ============================================================
 
-    if not query.strip():
-        raise ValueError("Query cannot be empty.")
+def build_retriever():
 
-    results = vector_store.similarity_search(
-        query,
-        k=top_k
+    return load_store().as_retriever(
+        search_type="similarity",
+        search_kwargs={
+            "k": TOP_K
+        },
     )
 
-    return results
 
-
-def retrieve_with_scores(vector_store, query, top_k=5):
-    """
-    Retrieve relevant chunks with similarity scores.
-    """
-
-    if not query.strip():
-        raise ValueError("Query cannot be empty.")
-
-    results = vector_store.similarity_search_with_score(
-        query,
-        k=top_k
-    )
-
-    return results
-
+# ============================================================
+# 4. TEST
+# Run:
+# python -m src.retrieval.retriever
+# ============================================================
 
 if __name__ == "__main__":
 
-    print("Loading transcript chunks...")
+    print("Building retriever...")
 
-    # Use existing data ingestion pipeline
-    chunks = ingest_data()
+    retriever = build_retriever()
 
-    print(f"Total chunks: {len(chunks)}")
-
-    # Create Chroma vector store
-    print("Creating Chroma vector store...")
-
-    vector_store = create_vector_store(chunks)
-
-    print(f"Chroma database created at: {DB_DIR}")
-
-    # Test query
-    query = "What is RAG Triad?"
+    query = "What is RAG?"
 
     print(f"\nQuery: {query}")
 
-    results = retrieve_documents(
-        vector_store=vector_store,
-        query=query,
-        top_k=5
-    )
+    results = retriever.invoke(query)
 
-    print(f"Retrieved chunks: {len(results)}")
+    print(f"\nRetrieved chunks: {len(results)}")
 
-    for index, document in enumerate(results, start=1):
+    for i, doc in enumerate(results, 1):
 
-        print(f"\n--- Result {index} ---")
+        print(f"\n--- Result {i} ---")
 
         print(
-            "Source:",
-            document.metadata.get("source")
+            f"[Session {doc.metadata.get('session')}]"
         )
 
         print(
-            "Session:",
-            document.metadata.get("session")
+            f"Source: {doc.metadata.get('source')}"
         )
 
         print(
-            "Content:",
-            document.page_content[:500]
+            f"{doc.page_content[:300]}..."
         )
+
+
+# ============================================================
+# WORKFLOW
+# ============================================================
+#
+# VTT Files
+#      ↓
+# load_transcripts()
+#      ↓
+# Clean transcript
+#      ↓
+# Create Documents
+#      ↓
+# RecursiveCharacterTextSplitter
+#      ↓
+# chunk_size = 750
+# chunk_overlap = 100
+#      ↓
+# Document Chunks
+#      ↓
+# Hugging Face Embeddings
+#      ↓
+# Chroma Vector Store
+#      ↓
+# Save to chroma_store/
+#      ↓
+# build_retriever()
+#      ↓
+# Similarity Search
+#      ↓
+# top_k = 5
+#      ↓
+# Retrieved Chunks
+#
+# ============================================================
+# IMPORTANT
+# ============================================================
+#
+# First run:
+#
+#     python -m src.retrieval.retriever
+#
+# This creates chroma_store/ if it doesn't exist.
+#
+# Later runs:
+#
+#     python -m src.retrieval.retriever
+#
+# Existing Chroma is loaded instead of re-embedding
+# the documents.
+#
+# If you change:
+#
+#     chunk_size
+#     chunk_overlap
+#     embedding_model
+#     source documents
+#
+# delete chroma_store/ and rebuild it.
+#
+# If you only change:
+#
+#     TOP_K
+#
+# you do NOT need to delete Chroma.
+#
+# ============================================================
