@@ -1,0 +1,41 @@
+{
+    "experiment": "baseline",
+    "description": "Baseline retriever before optimization",
+
+    "retriever": {
+        "name": "base_k5",
+        "search_type": "similarity",
+        "top_k": 5
+    },
+
+    "embedding": {
+        "model": "sentence-transformers/all-MiniLM-L6-v2"
+    },
+
+    "chunking": {
+        "chunk_size": 750,
+        "chunk_overlap": 100
+    },
+
+    "evaluation": {
+        "dataset": "goldens/retriever_goldens.json",
+        "test_cases": 15,
+        "threshold": 0.7,
+        "judge_model": "openai/gpt-oss-20b"
+    },
+
+    "metrics": {
+    "contextual_recall": 80,
+    "contextual_precision": 80
+},
+
+"average_score": 80,
+
+"status": "baseline",
+
+"notes": [
+    "Baseline retriever achieved 80% contextual recall and 80% contextual precision.",
+    "This baseline will be used to compare all subsequent optimization trials."
+]
+
+}
