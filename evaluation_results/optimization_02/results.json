@@ -1,0 +1,49 @@
+{
+    "experiment": "optimization_02",
+    "description": "Second retriever optimization trial",
+
+    "change_from_previous_trial": {
+        "parameter": "retriever",
+        "old_value": "base_k5",
+        "new_value": "cross_encoder_reranker"
+    },
+
+    "retriever": {
+        "name": "cross_encoder_reranker",
+        "search_type": "similarity + cross_encoder_reranking",
+        "top_k": 5
+    },
+
+    "embedding": {
+        "model": "sentence-transformers/all-MiniLM-L6-v2"
+    },
+
+    "chunking": {
+        "chunk_size": 1000,
+        "chunk_overlap": 150
+    },
+
+    "evaluation": {
+        "dataset": "goldens/retriever_goldens.json",
+        "test_cases": 15,
+        "threshold": 0.7,
+        "judge_model": "openai/gpt-oss-20b",
+        "failed_cases": 2
+    },
+
+    "metrics": {
+        "contextual_recall": 0.85,
+        "contextual_precision": 0.92
+    },
+
+    "comparison_with_previous": {
+        "recall_change": "+0.02",
+        "precision_change": "-0.05",
+        "failed_cases_change": "3 → 2"
+    },
+
+    "result": "improved",
+
+    "notes": "Adding a sentence-transformer cross-encoder reranker improved contextual recall from 0.83 to 0.85.",
+    "observation": "Contextual precision decreased from 0.97 to 0.92, but failed test cases decreased from 3 to 2. Overall retrieval coverage improved with the reranker."
+}

@@ -9,7 +9,7 @@ from deepeval.metrics import (
     ContextualPrecisionMetric,
 )
 
-from src.retrieval.retriever import build_retriever
+from src.retriever import build_retriever
 from evals.groq_judge import GroqJudge
 
 
@@ -32,15 +32,11 @@ with open(GOLDEN_PATH, "r", encoding="utf-8",) as f:
 
 goldens = goldens[:TEST_LIMIT]
 
-print(
-    f"Running evaluation on {len(goldens)} test cases..."
-)
+print(f"Running evaluation on {len(goldens)} test cases...")
 
 
 # Create Groq judge
-judge_model = GroqJudge(
-    model_name=JUDGE_MODEL
-)
+judge_model = GroqJudge(model_name=JUDGE_MODEL)
 
 
 # Build retriever
@@ -53,17 +49,10 @@ test_cases = []
 for index, golden in enumerate(goldens, 1):
 
     query = golden["query"]
-
-    print(
-        f"\nRetrieving test case {index}: {query}"
-    )
+    print(f"\nRetrieving test case {index}: {query}")
 
     retrieved = retriever.invoke(query)
-
-    retrieval_context = [
-        doc.page_content
-        for doc in retrieved
-    ]
+    retrieval_context = [doc.page_content for doc in retrieved]
 
     test_cases.append(
         LLMTestCase(
@@ -103,7 +92,7 @@ evaluate(
     test_cases=test_cases,
     metrics=metrics,
     hyperparameters={
-        "retriever": "base_k5",
+        "retriever": "reranker",
         "embedding_model": (
             "sentence-transformers/all-MiniLM-L6-v2"
         ),
