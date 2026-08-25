@@ -1,0 +1,49 @@
+{
+    "experiment": "optimization_01",
+    "description": "First retriever optimization trial",
+
+    "change_from_baseline": {
+        "parameter": "chunk_size and chunk_overlap",
+        "old_value": "chunk_size=750, chunk_overlap=100",
+        "new_value": "chunk_size=1000, chunk_overlap=150"
+    },
+
+    "retriever": {
+        "name": "base_k5",
+        "search_type": "similarity",
+        "top_k": 5
+    },
+
+    "embedding": {
+        "model": "sentence-transformers/all-MiniLM-L6-v2"
+    },
+
+    "chunking": {
+        "chunk_size": 1000,
+        "chunk_overlap": 150
+    },
+
+    "evaluation": {
+        "dataset": "goldens/retriever_goldens.json",
+        "test_cases": 15,
+        "threshold": 0.7,
+        "judge_model": "openai/gpt-oss-20b",
+        "failed_cases": 3
+    },
+
+    "metrics": {
+        "contextual_recall": 0.83,
+        "contextual_precision": 0.97
+    },
+
+    "comparison_with_baseline": {
+        "recall_change": "+0.03",
+        "precision_change": "+0.17",
+        "failed_cases_change": "5 → 3"
+    },
+
+    "result": "improved",
+
+    "notes": "Increasing the chunk size and overlap improved both contextual recall and contextual precision.",
+    "observation": "Failed test cases decreased from 5 to 3, indicating better overall retrieval performance."
+}

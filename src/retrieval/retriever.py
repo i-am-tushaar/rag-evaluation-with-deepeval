@@ -19,8 +19,8 @@ EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 COLLECTION_NAME = "rag_documents"
 
-CHUNK_SIZE = 750
-CHUNK_OVERLAP = 100
+CHUNK_SIZE = 1000
+CHUNK_OVERLAP = 150
 
 TOP_K = 5
 

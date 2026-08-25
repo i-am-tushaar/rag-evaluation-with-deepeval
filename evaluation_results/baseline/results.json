@@ -21,15 +21,16 @@
         "dataset": "goldens/retriever_goldens.json",
         "test_cases": 15,
         "threshold": 0.7,
-        "judge_model": "openai/gpt-oss-20b"
+        "judge_model": "openai/gpt-oss-20b",
+        "failed_cases": 5
     },
 
     "metrics": {
-    "contextual_recall": 80,
-    "contextual_precision": 80
+    "contextual_recall": 0.80,
+    "contextual_precision": 0.80
 },
 
-"average_score": 80,
+"average_score": 0.80,
 
 "status": "baseline",
 

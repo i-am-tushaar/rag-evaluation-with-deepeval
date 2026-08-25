@@ -107,8 +107,8 @@ evaluate(
         "embedding_model": (
             "sentence-transformers/all-MiniLM-L6-v2"
         ),
-        "chunk_size": 750,
-        "chunk_overlap": 100,
+        "chunk_size": 1000,
+        "chunk_overlap": 150,
         "top_k": TOP_K,
         "judge_model": JUDGE_MODEL,
         "golden_set": GOLDEN_PATH,
