@@ -1,0 +1,48 @@
+{
+    "experiment": "optimization_03",
+    "description": "Third retriever optimization trial",
+
+    "change_from_previous_trial": {
+        "parameter": "embedding_model",
+        "old_value": "sentence-transformers/all-MiniLM-L6-v2",
+        "new_value": "BAAI/bge-base-en-v1.5"
+    },
+
+    "retriever": {
+        "name": "cross_encoder_reranker",
+        "search_type": "similarity + cross_encoder_reranking",
+        "top_k": 5
+    },
+
+    "embedding": {
+        "model": "BAAI/bge-base-en-v1.5"
+    },
+
+    "chunking": {
+        "chunk_size": 1000,
+        "chunk_overlap": 150
+    },
+
+    "evaluation": {
+        "dataset": "goldens/retriever_goldens.json",
+        "test_cases": 15,
+        "threshold": 0.7,
+        "judge_model": "openai/gpt-oss-20b",
+        "failed_cases": 3
+    },
+
+    "metrics": {
+        "contextual_recall": 0.98,
+        "contextual_precision": 0.85
+    },
+
+    "comparison_with_previous": {
+        "recall_change": "+0.06",
+        "precision_change": "0.00",
+        "failed_cases_change": "2 → 3"
+    },
+
+    "result": "improved_recall",
+
+    "notes": "Upgrading the embedding model from sentence-transformers/all-MiniLM-L6-v2 to BAAI/bge-base-en-v1.5 improved contextual recall from 0.92 to 0.98 while maintaining contextual precision at 0.85. However, failed test cases increased from 2 to 3."
+}

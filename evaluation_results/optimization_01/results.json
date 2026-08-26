@@ -32,13 +32,13 @@
     },
 
     "metrics": {
-        "contextual_recall": 0.83,
-        "contextual_precision": 0.97
+        "contextual_recall": 0.97,
+        "contextual_precision": 0.83
     },
 
     "comparison_with_baseline": {
-        "recall_change": "+0.03",
-        "precision_change": "+0.17",
+        "recall_change": "+0.17",
+        "precision_change": "+0.03",
         "failed_cases_change": "5 → 3"
     },
 

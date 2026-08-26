@@ -32,18 +32,19 @@
     },
 
     "metrics": {
-        "contextual_recall": 0.85,
-        "contextual_precision": 0.92
+        "contextual_recall": 0.92,
+        "contextual_precision": 0.85
     },
 
     "comparison_with_previous": {
-        "recall_change": "+0.02",
-        "precision_change": "-0.05",
+        "recall_change": "-0.05",
+        "precision_change": "+0.02",
         "failed_cases_change": "3 → 2"
     },
 
-    "result": "improved",
+    "result": "mixed_improvement",
 
-    "notes": "Adding a sentence-transformer cross-encoder reranker improved contextual recall from 0.83 to 0.85.",
-    "observation": "Contextual precision decreased from 0.97 to 0.92, but failed test cases decreased from 3 to 2. Overall retrieval coverage improved with the reranker."
+    "notes": "Adding a Cross-Encoder Reranker improved contextual precision from 0.83 to 0.85 and reduced failed test cases from 3 to 2. However, contextual recall decreased from 0.97 to 0.92.",
+
+    "observation": "The Cross-Encoder Reranker improved the ranking quality of retrieved chunks, resulting in higher contextual precision and fewer failed cases. However, recall decreased at top_k=5, indicating that reranking improved relevance of the selected chunks but some relevant chunks were no longer included in the final top-5 results."
 }

@@ -2,7 +2,7 @@
 
 ## Objective
 
-Improve retriever performance by adding a Sentence Transformer cross-encoder reranker to the existing retrieval pipeline.
+Improve retriever performance by adding a Sentence Transformer Cross-Encoder Reranker to the existing retrieval pipeline.
 
 ## Change from Previous Trial
 
@@ -32,20 +32,24 @@ The embedding model and chunking configuration were kept unchanged.
 
 | Metric | Optimization 01 | Optimization 02 | Change |
 |---|---:|---:|---:|
-| Contextual Recall | 0.83 | 0.85 | +0.02 |
-| Contextual Precision | 0.97 | 0.92 | -0.05 |
+| Contextual Recall | 0.97 | 0.92 | -0.05 |
+| Contextual Precision | 0.83 | 0.85 | +0.02 |
 | Failed Cases | 3 | 2 | -1 |
 
 ## Conclusion
 
-Adding the cross-encoder reranker improved contextual recall from **0.83 → 0.85** and reduced failed test cases from **3 → 2**.
+Adding the Cross-Encoder Reranker improved contextual precision from **0.83 → 0.85** and reduced failed test cases from **3 → 2**.
 
-However, contextual precision decreased from **0.97 → 0.92**.
+However, contextual recall decreased from **0.97 → 0.92**.
+
+This indicates that the reranker improved the relevance and ranking quality of the retrieved chunks, but some relevant chunks were lost from the final top-5 results.
 
 ## Decision
 
-**Keep this configuration for further experimentation** because it achieved the highest contextual recall so far and the lowest number of failed test cases.
+**Keep this configuration for further experimentation.**
+
+Although recall decreased, the reranker improved precision and reduced the number of failed test cases. The precision-recall trade-off should be evaluated further before selecting the final retriever configuration.
 
 ## Next Step
 
-Use this configuration as the starting point for the next optimization trial and evaluate another retrieval parameter.
+Use this configuration as the starting point for the next optimization trial and evaluate another retrieval parameter, such as the embedding model or `top_k`.
