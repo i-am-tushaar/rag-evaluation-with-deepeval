@@ -8,7 +8,7 @@ from langchain_chroma import Chroma
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 
-load_dotenv()  # loads OPENAI_API_KEY from .env
+load_dotenv()  # loads GROQ_KEY from .env
 
 DATA_DIR = "data"
 DB_DIR = "chroma_store"
