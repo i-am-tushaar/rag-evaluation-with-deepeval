@@ -1,0 +1,80 @@
+{
+    "experiment": "final_benchmark",
+    "description": "Final benchmark of the optimized RAG retriever",
+
+    "retriever": {
+        "name": "cross_encoder_reranker",
+        "search_type": "similarity + cross_encoder_reranking",
+        "fetch_k": 10,
+        "top_k": 5
+    },
+
+    "embedding": {
+        "model": "BAAI/bge-base-en-v1.5"
+    },
+
+    "reranker": {
+        "model": "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    },
+
+    "chunking": {
+        "chunk_size": 1000,
+        "chunk_overlap": 150
+    },
+
+    "evaluation": {
+        "dataset": "goldens/retriever_goldens.json",
+        "test_cases": 15,
+        "threshold": 0.7,
+        "judge_model": "openai/gpt-oss-20b"
+    },
+
+    "metrics": {
+        "contextual_recall": null,
+        "contextual_precision": null,
+        "average_score": null,
+        "failed_cases": null
+    },
+
+    "benchmark_comparison": {
+        "baseline": {
+            "contextual_recall": 0.80,
+            "contextual_precision": 0.80,
+            "average_score": 0.80,
+            "failed_cases": 5
+        },
+
+        "optimization_01": {
+            "contextual_recall": 0.83,
+            "contextual_precision": 0.97,
+            "average_score": 0.90,
+            "failed_cases": 3
+        },
+
+        "optimization_02": {
+            "contextual_recall": 0.92,
+            "contextual_precision": 0.85,
+            "average_score": 0.885,
+            "failed_cases": 2
+        },
+
+        "optimization_03": {
+            "contextual_recall": 0.98,
+            "contextual_precision": 0.85,
+            "average_score": 0.915,
+            "failed_cases": 3
+        }
+    },
+
+    "best_recorded_trial": {
+        "experiment": "optimization_03",
+        "contextual_recall": 0.98,
+        "contextual_precision": 0.85,
+        "average_score": 0.915,
+        "failed_cases": 3
+    },
+
+    "final_decision": "pending_final_benchmark",
+
+    "notes": "Optimization 03 currently has the highest recorded average score of 0.915 and the highest contextual recall of 0.98. Optimization 02 had fewer failed cases with 2, while Optimization 01 achieved the highest contextual precision of 0.97. The final benchmark must be run on all 15 test cases before declaring the final retriever performance."
+}
