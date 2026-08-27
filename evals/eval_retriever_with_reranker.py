@@ -21,9 +21,7 @@ load_dotenv()
 # ============================================================
 
 GOLDEN_PATH = "goldens/retriever_goldens.json"
-
 JUDGE_MODEL = "openai/gpt-oss-20b"
-
 THRESHOLD = 0.7
 TOP_K = 5
 
@@ -36,18 +34,12 @@ TEST_LIMIT = 3
 # LOAD GOLDEN SET
 # ============================================================
 
-with open(
-    GOLDEN_PATH,
-    "r",
-    encoding="utf-8",
-) as f:
+with open(GOLDEN_PATH,"r",encoding="utf-8") as f:
     goldens = json.load(f)
 
 goldens = goldens[:TEST_LIMIT]
 
-print(
-    f"Running evaluation on {len(goldens)} test cases..."
-)
+print(f"Running evaluation on {len(goldens)} test cases...")
 
 
 # ============================================================
@@ -73,19 +65,12 @@ retriever = RerankingRetriever()
 test_cases = []
 
 for index, golden in enumerate(goldens, 1):
-
     query = golden["query"]
-
-    print(
-        f"\nRetrieving test case {index}: {query}"
-    )
+    print(f"\nRetrieving test case {index}: {query}")
 
     retrieved = retriever.invoke(query)
 
-    retrieval_context = [
-        doc.page_content
-        for doc in retrieved
-    ]
+    retrieval_context = [doc.page_content for doc in retrieved]
 
     test_cases.append(
         LLMTestCase(
