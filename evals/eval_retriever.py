@@ -22,7 +22,9 @@ JUDGE_MODEL = "openai/gpt-oss-20b"
 THRESHOLD = 0.7
 TOP_K = 5
 
-TEST_LIMIT = 3
+# Use 5 for quick testing
+# Change to 15 for the final trial
+TEST_LIMIT = 15
 
 
 # Load golden set

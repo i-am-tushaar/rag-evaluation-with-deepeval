@@ -32,7 +32,7 @@ TOP_K = 5
 
 # Use 5 for quick testing
 # Change to 15 for the final trial
-TEST_LIMIT = 5
+TEST_LIMIT = 15
 
 
 # 1. LOAD the faithfulness golden set (query + ideal_context)
