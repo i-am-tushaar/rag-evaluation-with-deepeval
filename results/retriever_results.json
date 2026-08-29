@@ -1,0 +1,9 @@
+{
+  "component": "Retriever",
+  "dataset": "retriever_goldens.json",
+  "test_cases": 15,
+  "metrics": {
+    "contextual_recall": 0.95,
+    "contextual_precision": 0.93
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "component": "Generator",
+  "dataset": "faithfulness_dataset.json",
+  "test_cases": 5,
+  "metrics": {
+    "faithfulness": 0.98,
+    "answer_relevancy": 0.98
+  }
+}

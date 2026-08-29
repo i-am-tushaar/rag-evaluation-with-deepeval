@@ -1,0 +1,9 @@
+{
+  "component": "Full RAG Pipeline",
+  "test_cases": 5,
+  "metrics": {
+    "contextual_relevancy": 0.90,
+    "faithfulness": 0.96,
+    "answer_relevancy": 0.94
+  }
+}
