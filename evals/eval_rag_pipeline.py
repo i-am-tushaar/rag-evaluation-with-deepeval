@@ -9,6 +9,7 @@ from deepeval.metrics import (
     ContextualRelevancyMetric,
 )
 
+from evals.groq_judge import GroqJudge
 from src.rag_pipeline import RagPipeline
 
 load_dotenv()
@@ -17,14 +18,21 @@ GOLDEN_PATH = "goldens/faithfulness_dataset.json"   # reuse the queries
 JUDGE_MODEL = "openai/gpt-oss-20b"
 THRESHOLD = 0.7
 
-# Use 5 for quick testing
+# Use 3 for quick testing
 # Change to 15 for the final trial
-TEST_LIMIT = 5
+TEST_LIMIT = 3
 
 
 # 1. LOAD queries (we only need the queries — context comes from the pipeline now)
-with open(GOLDEN_PATH) as f:
+with open(GOLDEN_PATH,"r",encoding="utf-8") as f:
     goldens = json.load(f)
+
+goldens = goldens[:TEST_LIMIT]
+
+print(f"Running evaluation on {len(goldens)} test cases...")
+
+# Create Groq judge
+judge_model = GroqJudge(model_name=JUDGE_MODEL)
 
 
 # 2. RUN THE FULL PIPELINE per query, build a test case from LIVE output
@@ -44,9 +52,9 @@ for g in goldens:
 
 # 3. THE THREE TRIAD METRICS
 metrics = [
-    ContextualRelevancyMetric(threshold=THRESHOLD, model=JUDGE_MODEL, include_reason=True),
-    FaithfulnessMetric(threshold=THRESHOLD, model=JUDGE_MODEL, include_reason=True),
-    AnswerRelevancyMetric(threshold=THRESHOLD, model=JUDGE_MODEL, include_reason=True),
+    ContextualRelevancyMetric(threshold=THRESHOLD, model=judge_model, include_reason=True),
+    FaithfulnessMetric(threshold=THRESHOLD, model=judge_model, include_reason=True),
+    AnswerRelevancyMetric(threshold=THRESHOLD, model=judge_model, include_reason=True),
 ]
 
 
