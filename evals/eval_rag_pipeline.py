@@ -38,6 +38,7 @@ judge_model = GroqJudge(model_name=JUDGE_MODEL)
 # 2. RUN THE FULL PIPELINE per query, build a test case from LIVE output
 rag = RagPipeline()
 test_cases = []
+
 for g in goldens:
     result = rag.invoke(g["query"])          # retrieve → rerank → generate
 
