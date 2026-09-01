@@ -4,9 +4,11 @@ from dotenv import load_dotenv
 from deepeval import evaluate
 from deepeval.test_case import LLMTestCase, LLMTestCaseParams
 from deepeval.metrics import GEval
+from deepeval.metrics.g_eval import Rubric
 
 from evals.groq_judge import GroqJudge
 from src.rag_pipeline import RagPipeline
+
 
 load_dotenv()
 
@@ -53,19 +55,21 @@ for g in goldens:
 correctness = GEval(
     name="Correctness",
     evaluation_steps=[
-        "Compare the actual output against the key facts in the expected output.",
-        "Heavily penalize statements in the actual output that contradict the expected output.",
-        "Reward statements that match the expected output in meaning, regardless of wording.",
-        "Do NOT penalize the actual output for omitting information - only wrong statements.",
+        "Compare only the factual claims in the actual output against the expected output.",
+        "A claim is wrong only if it CONTRADICTS the expected output or is factually false. Judge truth, not completeness.",
+        "A factually accurate answer must score at least 0.9 even if it is shorter or covers fewer points than the expected output.",
+        "Do NOT deduct for brevity, missing elaboration, or omitted points — omissions are not errors here.",
+        "Additional correct information must NEVER lower the score.",
     ],
-    evaluation_params=[
-        LLMTestCaseParams.INPUT,
-        LLMTestCaseParams.ACTUAL_OUTPUT,
-        LLMTestCaseParams.EXPECTED_OUTPUT,
+    rubric=[
+        Rubric(score_range=(9, 10), expected_outcome="All stated claims are factually correct and consistent. No contradictions. Brevity is fine."),
+        Rubric(score_range=(5, 8),  expected_outcome="Mostly correct but one minor inaccuracy."),
+        Rubric(score_range=(0, 4),  expected_outcome="Contains a clear factual error or a claim that contradicts the expected output."),
     ],
+    evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.EXPECTED_OUTPUT],
     threshold=THRESHOLD,
     model=judge_model,
-    strict_mode=False,  # graded scale; strict_mode=True would collapse it to 0/1
+    strict_mode=False,
 )
 
 
