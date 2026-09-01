@@ -1,0 +1,8 @@
+{
+  "component": "Application",
+  "dataset": "correctness_goldens.json",
+  "test_cases": 15,
+  "metrics": {
+    "correctness": 0.95
+  }
+}

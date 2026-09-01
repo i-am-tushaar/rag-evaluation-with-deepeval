@@ -21,3 +21,9 @@
 | Contextual Relevancy | 90% |
 | Faithfulness | 96% |
 | Answer Relevancy | 94% |
+
+## Application
+
+| Metric | Score |
+|---|---:|
+| Correctness | 95% |
