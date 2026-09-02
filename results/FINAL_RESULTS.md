@@ -27,3 +27,4 @@
 | Metric | Score |
 |---|---:|
 | Correctness | 95% |
+| Completeness | 76% |

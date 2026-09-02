@@ -3,6 +3,7 @@
   "dataset": "correctness_goldens.json",
   "test_cases": 15,
   "metrics": {
-    "correctness": 0.95
+    "correctness": 0.95,
+    "completeness": 0.76
   }
 }
