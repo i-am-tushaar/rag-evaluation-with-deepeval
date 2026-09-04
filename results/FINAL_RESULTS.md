@@ -28,3 +28,4 @@
 |---|---:|
 | Correctness | 95% |
 | Completeness | 76% |
+| Style | 84% |
