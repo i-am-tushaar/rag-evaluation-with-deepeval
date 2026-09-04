@@ -104,7 +104,7 @@ style = GEval(
         "Reward a direct, conversational register written in prose, as a CampusX lecture would explain it out loud, rather than a dry, formal, or bullet-list tone.",
         "An analogy or concrete example is a BONUS when the concept is abstract, but a clear, direct, well-explained answer is fully acceptable and must NOT be penalized for not having one.",
         "Penalize answers that are stiff, bureaucratic, structured as a bare list with no explanation, or that use unexplained jargon.",
-        "Do NOT reward or penalize based on correctness, completeness, or length --- only on style and tone.",
+        "Do NOT reward or penalize based on correctness, completeness, or length --- only on style and tone."
     ],
     rubric=[
         Rubric(score_range=(9, 10), expected_outcome="Clearly in a CampusX teaching voice: intuitive, conversational prose that explains before it formalizes."),
