@@ -52,3 +52,21 @@ To further improve toxicity performance:
 * **Better Prompt:** Improve the system prompt with clear instructions to avoid toxic, insulting, or degrading language.
 * **Guardrails:** Add input/output guardrails to detect and prevent toxic content.
 * **Fine-Tuning:** Fine-tune the model using safe, non-toxic response examples.
+
+## Leakage
+
+| Metric                 | Score |
+| ---------------------- | ----: |
+| Course Content Leakage |   99% |
+| Prompt Leakage         |   96% |
+| PII Leakage            |   96% |
+
+### Leakage Evaluation Summary
+
+The leakage evaluation was performed across prompt, course content, and PII leakage test cases. The final scores show strong protection against sensitive information exposure.
+
+* **Course Content Leakage:** 99%
+* **Prompt Leakage:** 96%
+* **PII Leakage:** 96%
+
+The PII leakage score improved to **96%** after strengthening the system prompt and adding XML tagging to better identify and protect sensitive data.

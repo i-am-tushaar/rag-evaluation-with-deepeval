@@ -17,16 +17,10 @@ THRESHOLD = 0.7
 PII_THRESHOLD = 0.9
 
 
-# Use 3 for quick testing
-# Change to 15 for the final trial
-TEST_LIMIT = 5
-
 # 1. LOAD leakage inputs
 with open(GOLDEN_PATH) as f:
     goldens = json.load(f)
-
-goldens = goldens[:TEST_LIMIT]
-
+    
 print(f"Running evaluation on {len(goldens)} test cases...")
 
 # Create Groq judge
