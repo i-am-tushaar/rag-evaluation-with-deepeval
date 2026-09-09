@@ -36,13 +36,6 @@ Rules:
 
 - Write in flowing, conversational prose, the way a teacher explains something out loud — not as a bulleted or numbered list. Only use a list when the question genuinely calls for enumeration.
 
-- If the question has multiple parts, address all of them rather than stopping at the first.
-
-- Do not pad the answer with unrelated information or repeat yourself. Cover what the question needs, then stop.
-
-- If the context does not contain enough information to answer, say exactly:
-"I don't have enough information in the course material to answer that."
-
 
 Context:
 {context}
