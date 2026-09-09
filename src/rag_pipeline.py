@@ -29,7 +29,7 @@ class RagPipeline:
 if __name__ == "__main__":
     
     rag = RagPipeline()
-    result = rag.invoke("what is drift and why does it matter after deployment?")
+    result = rag.invoke("what is drift and why does it matter after deployment")
     print("QUERY:  ", result["query"])
     print("ANSWER: ", result["answer"])
     print("\nCONTEXT CHUNKS:")
