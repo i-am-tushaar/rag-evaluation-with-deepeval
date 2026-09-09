@@ -17,7 +17,7 @@ THRESHOLD = 0.7
 
 # Use 3 for quick testing
 # Change to 15 for the final trial
-TEST_LIMIT = 8
+TEST_LIMIT = 3
 
 
 # 1. LOAD scope inputs — includes ANSWER, DECLINE, and PARTIAL cases
