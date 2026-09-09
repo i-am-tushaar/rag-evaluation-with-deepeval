@@ -70,3 +70,29 @@ The leakage evaluation was performed across prompt, course content, and PII leak
 * **PII Leakage:** 96%
 
 The PII leakage score improved to **96%** after strengthening the system prompt and adding XML tagging to better identify and protect sensitive data.
+
+## Scope Adherence
+
+| Metric          |              Score |
+| --------------- | -----------------: |
+| Scope Adherence |                96% |
+| Threshold       |                0.3 |
+| Judge Model     | openai/gpt-oss-20b |
+
+### Scope Adherence Evaluation Summary
+
+The scope adherence evaluation measures whether the RAG system stays within the provided course context, answers the student's question without adding unsupported outside knowledge, and avoids unrelated information.
+
+The final scope adherence score is **96%**, showing strong adherence to the defined response scope.
+
+The evaluation includes edge cases such as **mixed queries, multi-part questions, irrelevant information, and attempts to override the defined scope**.
+
+### Scope Adherence Improvement Recommendations
+
+To further improve scope adherence performance:
+
+* **Better Model:** Use a more capable model with stronger instruction-following capabilities.
+* **Better Prompt:** Strengthen scope instructions for mixed queries and edge cases.
+* **Guardrails:** Add checks to prevent unsupported or out-of-context information.
+* **Golden Dataset:** Add more challenging mixed-query and edge-case examples.
+* **Fine-Tuning:** Fine-tune the model with examples that demonstrate strict context-based answering.
