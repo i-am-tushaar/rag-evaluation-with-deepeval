@@ -1,0 +1,177 @@
+{
+  "evaluation": "Latency Evaluation",
+  "command": "python -m evals.eval_latency",
+  "warmup_runs": 2,
+  "measurement_samples": 20,
+  "average_answer_length_chars": 965,
+  "unit": "milliseconds",
+  "results": {
+    "end_to_end": {
+      "samples": 20,
+      "mean": 13968.7,
+      "p50": 15042.5,
+      "p95": 17711.3,
+      "p99": 17976.5,
+      "min": 1953.3,
+      "max": 18042.8
+    },
+    "ttft": {
+      "samples": 20,
+      "mean": 13712.2,
+      "p50": 14960.7,
+      "p95": 17222.3,
+      "p99": 17537.0,
+      "min": 1636.8,
+      "max": 17615.7
+    },
+    "retrieval": {
+      "samples": 20,
+      "mean": 1634.6,
+      "p50": 1372.1,
+      "p95": 2571.1,
+      "p99": 4907.5,
+      "min": 922.6,
+      "max": 5491.6
+    },
+    "generation": {
+      "samples": 20,
+      "mean": 12334.0,
+      "p50": 13823.3,
+      "p95": 16145.9,
+      "p99": 16206.6,
+      "min": 874.0,
+      "max": 16221.8
+    }
+  },
+  "slo": {
+    "full_answer": {
+      "target_p95_ms": 3000,
+      "actual_p95_ms": 17711.3,
+      "status": "FAIL"
+    },
+    "first_token_perceived": {
+      "target_p95_ms": 1200,
+      "actual_p95_ms": 17222.3,
+      "status": "FAIL"
+    }
+  },
+  "summary": {
+    "overall_status": "FAIL",
+    "main_bottleneck": "Generation",
+    "observation": "Generation contributes most of the end-to-end latency."
+  },
+  "improvement_recommendations": {
+    "priority": "High",
+    "main_focus": "Reduce generation latency and improve time to first token",
+    "recommendations": [
+      {
+        "step": 1,
+        "title": "Use a faster or smaller LLM",
+        "description": "Use a faster model or a smaller model for simple questions to reduce generation time.",
+        "expected_benefit": "Lower generation latency",
+        "priority": "High"
+      },
+      {
+        "step": 2,
+        "title": "Reduce maximum output tokens",
+        "description": "Limit the response length and instruct the model to provide concise answers without unnecessary repetition.",
+        "example": "Keep the answer within 150–250 words unless more detail is required.",
+        "expected_benefit": "Fewer generated tokens and faster responses",
+        "priority": "High"
+      },
+      {
+        "step": 3,
+        "title": "Reduce prompt and context size",
+        "description": "Remove duplicate instructions, unnecessary conversation history, irrelevant text, and repeated document content.",
+        "expected_benefit": "Lower input processing time and faster first-token generation",
+        "priority": "High"
+      },
+      {
+        "step": 4,
+        "title": "Reduce retrieved documents",
+        "description": "Test lower top_k and fetch_k values so that fewer document chunks are passed to the LLM.",
+        "example": {
+          "top_k": 4,
+          "fetch_k": 10
+        },
+        "expected_benefit": "Smaller context and lower retrieval and generation latency",
+        "priority": "High"
+      },
+      {
+        "step": 5,
+        "title": "Enable streaming",
+        "description": "Enable token streaming so users can see the beginning of the answer earlier.",
+        "expected_benefit": "Improved perceived response time",
+        "note": "Streaming improves perceived latency but may not reduce total answer generation time.",
+        "priority": "High"
+      },
+      {
+        "step": 6,
+        "title": "Optimize document chunking",
+        "description": "Test smaller chunk sizes and lower overlap values to reduce the amount of context sent to the LLM.",
+        "example": {
+          "chunk_size": 700,
+          "chunk_overlap": 100
+        },
+        "expected_benefit": "Smaller prompts and faster processing",
+        "priority": "Medium"
+      },
+      {
+        "step": 7,
+        "title": "Optimize retrieval",
+        "description": "Reduce unnecessary reranking, optimize vector database search, and avoid retrieving irrelevant chunks.",
+        "expected_benefit": "Lower retrieval latency",
+        "priority": "Medium"
+      },
+      {
+        "step": 8,
+        "title": "Add caching",
+        "description": "Cache repeated questions, embeddings, and frequently used retrieval results.",
+        "expected_benefit": "Faster responses for repeated queries",
+        "priority": "Medium"
+      },
+      {
+        "step": 9,
+        "title": "Load models only once",
+        "description": "Initialize embedding models, vector stores, and LLMs during application startup instead of loading them for every request.",
+        "expected_benefit": "Lower startup and query latency",
+        "priority": "High"
+      },
+      {
+        "step": 10,
+        "title": "Use GPU acceleration",
+        "description": "Use a supported GPU environment for embedding, reranking, and model inference when available.",
+        "expected_benefit": "Faster model inference and embedding operations",
+        "priority": "Medium"
+      }
+    ],
+    "recommended_order": [
+      "Use a faster or smaller LLM",
+      "Reduce maximum output tokens",
+      "Reduce prompt and retrieved context size",
+      "Reduce top_k and fetch_k",
+      "Enable streaming",
+      "Load models only once",
+      "Add caching",
+      "Optimize chunking and reranking",
+      "Test GPU acceleration",
+      "Run latency evaluation again"
+    ],
+    "optimization_targets": {
+      "full_answer_p95_ms": {
+        "target": 3000,
+        "current": 17711.3,
+        "status": "FAIL"
+      },
+      "first_token_p95_ms": {
+        "target": 1200,
+        "current": 17222.3,
+        "status": "FAIL"
+      }
+    },
+    "next_action": {
+      "description": "Apply the latency improvements and run the evaluation again.",
+      "command": "python -m evals.eval_latency"
+    }
+  }
+}
