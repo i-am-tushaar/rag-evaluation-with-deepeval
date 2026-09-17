@@ -1,0 +1,153 @@
+
+{
+  "evaluation": "Reliability Evaluation",
+  "command": "python -m evals.eval_reliability",
+  "evaluation_type": "Operational Evaluation",
+  "metric": "Reliability",
+  "measurement_samples": 20,
+  "questions": 4,
+  "repeats_per_question": 5,
+  "max_retries": 2,
+  "backoff_strategy": "Exponential Backoff",
+  "backoff_base_seconds": 0.5,
+
+  "results": {
+    "requests": {
+      "total": 20,
+      "successful": 20,
+      "failed": 0
+    },
+    "reliability_metrics": {
+      "success_rate_percent": 100.0,
+      "error_rate_percent": 0.0,
+      "retry_rate_percent": 0.0
+    },
+    "retry_metrics": {
+      "total_retries": 0,
+      "max_retries_per_request": 2,
+      "retry_strategy": "Exponential Backoff",
+      "retry_delays_seconds": [
+        0.5,
+        1.0
+      ]
+    }
+  },
+
+  "slo": {
+    "success_rate": {
+      "target_percent": 99.0,
+      "actual_percent": 100.0,
+      "status": "PASS"
+    },
+    "error_rate": {
+      "target_percent": 1.0,
+      "actual_percent": 0.0,
+      "status": "PASS"
+    },
+    "retry_rate": {
+      "target_percent": 5.0,
+      "actual_percent": 0.0,
+      "status": "PASS"
+    }
+  },
+
+  "summary": {
+    "overall_status": "PASS",
+    "observation": "The RAG application successfully served all 20 requests without failures or retries during the reliability evaluation.",
+    "success_observation": "All 20 requests completed successfully, resulting in a 100.00% success rate.",
+    "error_observation": "No request failures were observed. The measured error rate was 0.00%.",
+    "retry_observation": "No retries were required during the evaluation. The measured retry rate was 0.00%.",
+    "reliability_stability": "The application completed all evaluation requests successfully under the tested conditions.",
+    "limitation": "This result reflects 20 test requests only. It does not guarantee production reliability under higher traffic, network failures, or service outages."
+  },
+
+  "improvement_recommendations": {
+    "priority": "Medium",
+    "main_focus": "Maintain high request success rates and validate reliability under realistic failure conditions.",
+
+    "recommendations": [
+      {
+        "step": 1,
+        "title": "Increase evaluation sample size",
+        "description": "Run more requests across different questions and repeated evaluation sessions.",
+        "expected_benefit": "More confidence in reliability measurements.",
+        "priority": "High"
+      },
+      {
+        "step": 2,
+        "title": "Test failure scenarios",
+        "description": "Simulate API timeouts, network failures, model errors, and unavailable services.",
+        "expected_benefit": "Verify how the application behaves during failures.",
+        "priority": "High"
+      },
+      {
+        "step": 3,
+        "title": "Validate retry behavior",
+        "description": "Test exponential backoff and retry limits under temporary failures.",
+        "expected_benefit": "Improved recovery from transient errors.",
+        "priority": "High"
+      },
+      {
+        "step": 4,
+        "title": "Add timeout handling",
+        "description": "Configure request timeouts and handle slow or unresponsive services safely.",
+        "expected_benefit": "Prevent requests from hanging indefinitely.",
+        "priority": "High"
+      },
+      {
+        "step": 5,
+        "title": "Add structured error logging",
+        "description": "Record error types, failed requests, retry attempts, and timestamps.",
+        "expected_benefit": "Faster debugging and root-cause analysis.",
+        "priority": "Medium"
+      },
+      {
+        "step": 6,
+        "title": "Monitor production reliability",
+        "description": "Track success rate, error rate, retry rate, and request failures in production.",
+        "expected_benefit": "Early detection of reliability issues.",
+        "priority": "High"
+      },
+      {
+        "step": 7,
+        "title": "Run reliability evaluation regularly",
+        "description": "Include reliability testing in CI/CD or scheduled evaluation runs.",
+        "expected_benefit": "Detect regressions after code or model changes.",
+        "priority": "Medium"
+      }
+    ],
+
+    "recommended_order": [
+      "Increase evaluation sample size",
+      "Test failure scenarios",
+      "Validate retry behavior",
+      "Add timeout handling",
+      "Add structured error logging",
+      "Monitor production reliability",
+      "Run reliability evaluation again"
+    ],
+
+    "optimization_targets": {
+      "success_rate_percent": {
+        "target": 99.0,
+        "current": 100.0,
+        "status": "PASS"
+      },
+      "error_rate_percent": {
+        "target": 1.0,
+        "current": 0.0,
+        "status": "PASS"
+      },
+      "retry_rate_percent": {
+        "target": 5.0,
+        "current": 0.0,
+        "status": "PASS"
+      }
+    },
+
+    "next_action": {
+      "description": "Increase the test sample size and run failure-injection tests to validate reliability under realistic failure conditions.",
+      "command": "python -m evals.eval_reliability"
+    }
+  }
+}

@@ -218,7 +218,7 @@ To further improve scope adherence performance:
 
 ### 3.3 Operations
 
-Operations evaluations measure the runtime performance and latency of the RAG application.
+Operations evaluations measure the runtime performance, cost, and reliability of the RAG application.
 
 #### 3.3.1 Latency Evaluation
 
@@ -389,4 +389,106 @@ After applying the improvements, run:
 
 ```bash
 python -m evals.eval_cost
+```
+
+#### 3.3.3 Reliability Evaluation
+
+The reliability evaluation measures whether the RAG application consistently returns successful responses under repeated requests, including how well it recovers through retries.
+
+**Reliability Evaluation Setup**
+
+| Metric                  | Value                |
+|---------------------------|----------------------:|
+| Measurement Samples       |                    20 |
+| Questions                 |                     4 |
+| Repeats per Question      |                     5 |
+| Max Retries               |                     2 |
+| Backoff Strategy          | Exponential Backoff  |
+| Backoff Base (seconds)    |                   0.5 |
+
+**Request Results**
+
+| Metric                | Result |
+|-------------------------|-------:|
+| Total Requests          |     20 |
+| Successful Requests     |     20 |
+| Failed Requests         |      0 |
+
+**Reliability Metrics**
+
+| Metric          | Score  |
+|-------------------|-------:|
+| Success Rate      | 100.0% |
+| Error Rate        |   0.0% |
+| Retry Rate        |   0.0% |
+
+**Retry Metrics**
+
+| Metric                    | Result               |
+|-----------------------------|----------------------:|
+| Total Retries                |                    0 |
+| Max Retries per Request      |                    2 |
+| Retry Strategy               | Exponential Backoff |
+| Retry Delays (seconds)       |           0.5, 1.0   |
+
+**Reliability SLO**
+
+| Metric          | Target | Actual | Status |
+|-------------------|-------:|-------:|--------|
+| Success Rate      |  99.0% | 100.0% | PASS   |
+| Error Rate        |   1.0% |   0.0% | PASS   |
+| Retry Rate        |   5.0% |   0.0% | PASS   |
+
+**Reliability Evaluation Summary**
+
+The RAG application successfully served all 20 requests without failures or retries during the reliability evaluation.
+
+- All 20 requests completed successfully, resulting in a 100.00% success rate.
+- No request failures were observed. The measured error rate was 0.00%.
+- No retries were required during the evaluation. The measured retry rate was 0.00%.
+- The application completed all evaluation requests successfully under the tested conditions.
+
+This result reflects 20 test requests only. It does not guarantee production reliability under higher traffic, network failures, or service outages.
+
+**Reliability Improvement Recommendations**
+
+Priority: Medium. Main focus: maintain high request success rates and validate reliability under realistic failure conditions.
+
+1. Increase Evaluation Sample Size (High priority)
+   Run more requests across different questions and repeated evaluation sessions. Expected benefit: more confidence in reliability measurements.
+
+2. Test Failure Scenarios (High priority)
+   Simulate API timeouts, network failures, model errors, and unavailable services. Expected benefit: verify how the application behaves during failures.
+
+3. Validate Retry Behavior (High priority)
+   Test exponential backoff and retry limits under temporary failures. Expected benefit: improved recovery from transient errors.
+
+4. Add Timeout Handling (High priority)
+   Configure request timeouts and handle slow or unresponsive services safely. Expected benefit: prevent requests from hanging indefinitely.
+
+5. Add Structured Error Logging (Medium priority)
+   Record error types, failed requests, retry attempts, and timestamps. Expected benefit: faster debugging and root cause analysis.
+
+6. Monitor Production Reliability (High priority)
+   Track success rate, error rate, retry rate, and request failures in production. Expected benefit: early detection of reliability issues.
+
+7. Run Reliability Evaluation Regularly (Medium priority)
+   Include reliability testing in CI/CD or scheduled evaluation runs. Expected benefit: detect regressions after code or model changes.
+
+**Recommended Optimization Order**
+
+1. Increase evaluation sample size.
+2. Test failure scenarios.
+3. Validate retry behavior.
+4. Add timeout handling.
+5. Add structured error logging.
+6. Monitor production reliability.
+7. Run reliability evaluation again.
+
+**Re-evaluation**
+
+After applying the improvements, run:
+
+```bash
+python -m evals.eval_reliability
 ```
