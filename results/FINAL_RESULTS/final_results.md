@@ -312,3 +312,113 @@ After applying the improvements, run:
 
 ```bash
 python -m evals.eval_latency
+
+
+---
+
+### 3.3.2 Cost Evaluation
+
+The cost evaluation measures the estimated cost of each RAG query using input tokens, cached input tokens, output tokens, and the model's per-token pricing.
+
+Cost is a **derived metric**:
+
+`Cost = Tokens × Price`
+
+The evaluation uses actual token usage from the LLM and calculates the estimated cost per query, daily cost, monthly cost, and budget status.
+
+#### Cost Evaluation Results
+
+| Metric | Result |
+|---|---:|
+| Model | gpt-4o-mini |
+| Measurement Samples | 12 |
+| Average Input Tokens | 1793 |
+| Average Output Tokens | 316 |
+| Average Cached Input Tokens | 0 |
+| Average Cost per Query | $0.000459 |
+| Average Cost per Query (INR) | ₹0.0404 |
+| Minimum Cost per Query | $0.000357 |
+| Maximum Cost per Query | $0.000593 |
+| Input Cost Share | 59% |
+| Output Cost Share | 41% |
+
+#### Cost Budget SLO
+
+| Metric | Target | Actual | Status |
+|---|---:|---:|---|
+| Cost per Query | $0.001500 | $0.000459 | PASS |
+
+The average cost per query is **$0.000459**, which is below the configured budget of **$0.001500 per query**.
+
+#### Business Cost Projection
+
+Based on an estimated traffic of 2000 queries per day:
+
+| Metric | USD | INR |
+|---|---:|---:|
+| Cost per Query | $0.000459 | ₹0.0404 |
+| Cost per Day | $0.92 | ₹80.72 |
+| Cost per Month | $27.52 | ₹2,421.61 |
+
+#### Cost Evaluation Summary
+
+- **Average Cost per Query:** $0.000459
+- **Average Input Tokens:** 1793
+- **Average Output Tokens:** 316
+- **Cost Range:** $0.000357 to $0.000593
+- **Budget Status:** PASS
+- **Daily Projection:** $0.92
+- **Monthly Projection:** $27.52
+
+The cost evaluation passed the configured budget SLO. The estimated cost remained within a tight range across 12 samples.
+
+The evaluation reported **0 cached input tokens** during the offline run. Production prompt caching may reduce the actual cost when repeated prompt prefixes are cached by the provider.
+
+#### Cost Improvement Recommendations
+
+1. **Reduce Input Tokens**
+
+   Remove unnecessary prompt instructions, duplicate context, and irrelevant retrieved chunks.
+
+2. **Reduce Output Tokens**
+
+   Use concise answer instructions and limit maximum output tokens when appropriate.
+
+3. **Optimize Retrieved Context**
+
+   Reduce unnecessary `top_k` and chunk overlap while maintaining retrieval quality.
+
+4. **Use Prompt Caching**
+
+   Take advantage of provider prompt caching for repeated system prompt prefixes when supported.
+
+5. **Use a Cheaper Model**
+
+   Test a lower-cost model for simple questions while maintaining answer quality.
+
+6. **Cache Repeated Work**
+
+   Cache repeated questions, embeddings, and retrieval results where appropriate.
+
+7. **Monitor Production Token Usage**
+
+   Track input, output, and cached tokens in production to compare actual billing with offline estimates.
+
+#### Recommended Optimization Order
+
+- Reduce input tokens.
+- Reduce output tokens.
+- Optimize retrieved context.
+- Use prompt caching.
+- Test a cheaper model.
+- Cache repeated work.
+- Monitor production token usage.
+- Run the cost evaluation again.
+
+#### Re-evaluation
+
+After applying the improvements, run:
+
+```bash
+python -m evals.eval_cost
+```

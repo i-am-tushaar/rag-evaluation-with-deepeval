@@ -1,0 +1,143 @@
+
+{
+  "evaluation": "Cost Evaluation",
+  "command": "python -m evals.eval_cost",
+  "model": "gpt-4o-mini",
+  "measurement_samples": 12,
+  "questions": 4,
+  "repeats_per_question": 3,
+  "unit": "USD",
+  "pricing": {
+    "input_per_1M_tokens": 0.15,
+    "cached_input_per_1M_tokens": 0.075,
+    "output_per_1M_tokens": 0.6,
+    "currency_conversion_usd_to_inr": 88.0
+  },
+  "results": {
+    "tokens": {
+      "samples": 12,
+      "average_input_tokens": 1793,
+      "average_output_tokens": 316,
+      "average_cached_input_tokens": 0
+    },
+    "cost_per_query": {
+      "mean_usd": 0.000459,
+      "mean_inr": 0.0404,
+      "min_usd": 0.000357,
+      "max_usd": 0.000593,
+      "input_cost_share_percent": 59,
+      "output_cost_share_percent": 41
+    }
+  },
+  "business_projection": {
+    "queries_per_day": 2000,
+    "daily": {
+      "usd": 0.92,
+      "inr": 80.72
+    },
+    "monthly": {
+      "days": 30,
+      "usd": 27.52,
+      "inr": 2421.61
+    }
+  },
+  "slo": {
+    "cost_per_query": {
+      "target_usd": 0.0015,
+      "actual_usd": 0.000459,
+      "status": "PASS"
+    }
+  },
+  "summary": {
+    "overall_status": "PASS",
+    "main_cost_driver": "Input tokens",
+    "observation": "Average cost is $0.000459 per query, which is below the configured budget of $0.0015 per query.",
+    "cost_stability": "Cost remained within a tight range of $0.000357 to $0.000593 across 12 samples.",
+    "caching_observation": "No cached input tokens were reported during the offline evaluation. Production prompt caching may reduce the actual input cost."
+  },
+  "improvement_recommendations": {
+    "priority": "Medium",
+    "main_focus": "Reduce token usage and optimize model pricing while maintaining answer quality",
+    "recommendations": [
+      {
+        "step": 1,
+        "title": "Reduce input tokens",
+        "description": "Reduce unnecessary prompt instructions, duplicate context, and irrelevant retrieved chunks.",
+        "expected_benefit": "Lower input token cost per query",
+        "priority": "High"
+      },
+      {
+        "step": 2,
+        "title": "Reduce output tokens",
+        "description": "Use concise answer instructions and limit maximum output tokens when detailed answers are not required.",
+        "expected_benefit": "Lower output token cost",
+        "priority": "High"
+      },
+      {
+        "step": 3,
+        "title": "Optimize retrieved context",
+        "description": "Reduce unnecessary top_k and chunk overlap while maintaining retrieval quality.",
+        "expected_benefit": "Smaller prompts and lower input cost",
+        "priority": "High"
+      },
+      {
+        "step": 4,
+        "title": "Use prompt caching",
+        "description": "Take advantage of provider prompt caching for repeated system prompt prefixes when supported.",
+        "expected_benefit": "Lower cost for cached input tokens",
+        "priority": "Medium"
+      },
+      {
+        "step": 5,
+        "title": "Use a cheaper model when suitable",
+        "description": "Test a lower-cost model for simple questions while preserving quality for complex questions.",
+        "expected_benefit": "Lower cost per query",
+        "priority": "Medium"
+      },
+      {
+        "step": 6,
+        "title": "Cache repeated work",
+        "description": "Cache repeated questions, embeddings, and retrieval results where appropriate.",
+        "expected_benefit": "Lower repeated computation and API cost",
+        "priority": "Medium"
+      },
+      {
+        "step": 7,
+        "title": "Monitor production token usage",
+        "description": "Track input, output, and cached tokens in production to compare actual billing with offline estimates.",
+        "expected_benefit": "More accurate cost monitoring",
+        "priority": "High"
+      }
+    ],
+    "recommended_order": [
+      "Reduce input tokens",
+      "Reduce output tokens",
+      "Optimize retrieved context",
+      "Use prompt caching",
+      "Use a cheaper model when suitable",
+      "Cache repeated work",
+      "Monitor production token usage",
+      "Run cost evaluation again"
+    ],
+    "optimization_targets": {
+      "cost_per_query_usd": {
+        "target": 0.0015,
+        "current": 0.000459,
+        "status": "PASS"
+      },
+      "daily_cost_usd": {
+        "queries_per_day": 2000,
+        "current": 0.92
+      },
+      "monthly_cost_usd": {
+        "queries_per_day": 2000,
+        "days": 30,
+        "current": 27.52
+      }
+    },
+    "next_action": {
+      "description": "Apply token and cost optimizations, then run the cost evaluation again.",
+      "command": "python -m evals.eval_cost"
+    }
+  }
+}
