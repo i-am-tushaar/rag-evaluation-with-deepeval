@@ -9,51 +9,67 @@ from deepeval.metrics import (
     ContextualPrecisionMetric,
 )
 
-from src.retriever import build_retriever
 from evals.groq_judge import GroqJudge
+from src.reranker import RerankingRetriever
 
 
 load_dotenv()
 
 
-# Configuration
+# ============================================================
+# CONFIGURATION
+# ============================================================
+
 GOLDEN_PATH = "goldens/retriever_goldens.json"
 JUDGE_MODEL = "openai/gpt-oss-20b"
 THRESHOLD = 0.7
 TOP_K = 5
 
-# Use 5 for quick testing
+# Use 3 for quick testing
 # Change to 15 for the final trial
-TEST_LIMIT = 15
+TEST_LIMIT = 3
 
 
-# Load golden set
-with open(GOLDEN_PATH, "r", encoding="utf-8",) as f:
+# ============================================================
+# LOAD GOLDEN SET
+# ============================================================
+
+with open(GOLDEN_PATH,"r",encoding="utf-8") as f:
     goldens = json.load(f)
-
 
 goldens = goldens[:TEST_LIMIT]
 
 print(f"Running evaluation on {len(goldens)} test cases...")
 
 
-# Create Groq judge
-judge_model = GroqJudge(model_name=JUDGE_MODEL)
+# ============================================================
+# CREATE GROQ JUDGE
+# ============================================================
+
+judge_model = GroqJudge(
+    model_name=JUDGE_MODEL
+)
 
 
-# Build retriever
-retriever = build_retriever()
+# ============================================================
+# BUILD RERANKING RETRIEVER
+# ============================================================
+
+retriever = RerankingRetriever()
 
 
-# Create test cases
+# ============================================================
+# CREATE TEST CASES
+# ============================================================
+
 test_cases = []
 
 for index, golden in enumerate(goldens, 1):
-
     query = golden["query"]
     print(f"\nRetrieving test case {index}: {query}")
 
     retrieved = retriever.invoke(query)
+
     retrieval_context = [doc.page_content for doc in retrieved]
 
     test_cases.append(
@@ -68,7 +84,10 @@ for index, golden in enumerate(goldens, 1):
     )
 
 
-# DeepEval metrics
+# ============================================================
+# DEEPEVAL METRICS
+# ============================================================
+
 metrics = [
 
     ContextualRecallMetric(
@@ -87,21 +106,31 @@ metrics = [
 ]
 
 
-# Run evaluation
+# ============================================================
+# RUN EVALUATION
+# ============================================================
+
 print("\nStarting DeepEval...\n")
 
 evaluate(
     test_cases=test_cases,
     metrics=metrics,
+
     hyperparameters={
+
         "retriever": "reranker",
-        "embedding_model": (
-            "sentence-transformers/all-MiniLM-L6-v2"
-        ),
+
+        "embedding_model":
+            "sentence-transformers/all-MiniLM-L6-v2",
+
         "chunk_size": 1000,
+
         "chunk_overlap": 150,
+
         "top_k": TOP_K,
+
         "judge_model": JUDGE_MODEL,
+
         "golden_set": GOLDEN_PATH,
     },
 )
