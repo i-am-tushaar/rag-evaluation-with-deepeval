@@ -3,12 +3,12 @@ import re
 import glob
 
 from dotenv import load_dotenv
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 
-load_dotenv()  # loads GROQ_KEY from .env
+load_dotenv()  # loads OPENAI_API_KEY from .env
 
 DATA_DIR = "data"
 DB_DIR = "chroma_store"
@@ -36,7 +36,7 @@ def load_transcripts():
 
 # 2. BUILD ---- chunk, embed once, and keep it on disk so we don't re-embed
 def load_store():
-    embeddings = HuggingFaceEmbeddings(model_name="BAAI/bge-base-en-v1.5")
+    embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 
     if os.path.exists(DB_DIR):
         return Chroma(persist_directory=DB_DIR, embedding_function=embeddings)
