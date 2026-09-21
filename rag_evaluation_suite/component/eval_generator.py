@@ -8,75 +8,88 @@ by the context it was given? (Did the generator make things up?)
 
 ISOLATION: we feed the generator the GOLDEN context (the known-good chunks
 from the faithfulness dataset), NOT the retriever's output. So a low score
-is purely the generator's fault — the context was already correct.
+is purely the generator's fault --- the context was already correct.
 
     python -m evals.eval_generator
 """
 
-import json
 from dotenv import load_dotenv
 
 from deepeval import evaluate
 from deepeval.test_case import LLMTestCase
 from deepeval.metrics import FaithfulnessMetric, AnswerRelevancyMetric
 
-from src.generator import generate   # your generator: generate(query, context) -> answer
+from src.generator import generate
 from evals.groq_judge import GroqJudge
+from evals.harness import load_goldens, summarize_by_metric, print_summary
 
 load_dotenv()
 
 GOLDEN_PATH = "goldens/faithfulness_dataset.json"
 JUDGE_MODEL = "openai/gpt-oss-20b"
 THRESHOLD = 0.7
-TOP_K = 5
 
 # Use 5 for quick testing
 # Change to 15 for the final trial
-TEST_LIMIT = 15
+TEST_LIMIT = 3
 
 
-# 1. LOAD the faithfulness golden set (query + ideal_context)
-with open(GOLDEN_PATH) as f:
-    goldens = json.load(f)
+def run():
+    # 1. LOAD the faithfulness golden set
+    goldens = load_goldens(GOLDEN_PATH)
 
+    # 2. CREATE THE JUDGE
+    judge_model = GroqJudge(model_name=JUDGE_MODEL)
 
-print("Loaded file:", GOLDEN_PATH)
-print("Type:", type(goldens))
-print("Number of records:", len(goldens))
+    # 3. RUN THE GENERATOR on the GOLDEN context
+    test_cases = []
 
+    for g in goldens[:TEST_LIMIT]:
+        context = g["ideal_context"]
+        answer = generate(g["query"], context)
 
-# Create Groq judge
-judge_model = GroqJudge(model_name=JUDGE_MODEL)
-
-
-# 2. RUN THE GENERATOR on the GOLDEN context (isolation), build one test case each
-test_cases = []
-for g in goldens[:TEST_LIMIT]:
-    context = g["ideal_context"]              # known-good context (list of chunk strings)
-    answer = generate(g["query"], context)    # RUN the generator -> actual_output
-
-    test_cases.append(
-        LLMTestCase(
-            input=g["query"],
-            actual_output=answer,             # the generated answer we're judging
-            retrieval_context=context,        # faithfulness checks the answer against THIS
-            # no expected_output — faithfulness never reads it
+        test_cases.append(
+            LLMTestCase(
+                input=g["query"],
+                actual_output=answer,
+                retrieval_context=context,
+                # no expected_output --- faithfulness never reads it
+            )
         )
+
+    # 4. THE METRICS
+    metrics = [
+        FaithfulnessMetric(
+            threshold=THRESHOLD,
+            model=judge_model,
+            include_reason=True,
+        ),
+        AnswerRelevancyMetric(
+            threshold=THRESHOLD,
+            model=judge_model,
+            include_reason=True,
+        ),
+    ]
+
+    # 5. EVALUATE
+    result = evaluate(
+        test_cases=test_cases,
+        metrics=metrics,
+        hyperparameters={
+            "generator": "generate",
+            "judge_model": JUDGE_MODEL,
+            "golden_set": GOLDEN_PATH,
+            "test_limit": TEST_LIMIT,
+        },
     )
 
-
-# 3. THE METRIC — decomposes actual_output into claims, attributes each to context
-metrics = [FaithfulnessMetric(
-    threshold=THRESHOLD,
-    model=judge_model,
-    include_reason=True,   # prints WHY each score — shows which claims were unsupported
-),
-AnswerRelevancyMetric(
-    threshold=THRESHOLD, 
-    model=judge_model, 
-    include_reason=True)
-]
+    return summarize_by_metric(result)
 
 
-# 4. EVALUATE — runs the metric on every case, prints a report
-evaluate(test_cases=test_cases, metrics=metrics)
+def run_local():
+    """Standalone convenience function."""
+    return run()
+
+
+if __name__ == "__main__":
+    print_summary("generator", run_local())

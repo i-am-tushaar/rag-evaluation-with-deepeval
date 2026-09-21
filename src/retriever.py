@@ -3,44 +3,86 @@ import re
 import glob
 
 from dotenv import load_dotenv
-from langchain_openai import OpenAIEmbeddings
+
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 
-load_dotenv()  # loads OPENAI_API_KEY from .env
+
+load_dotenv()
+
 
 DATA_DIR = "data"
 DB_DIR = "chroma_store"
 
+# Hugging Face embedding model
+EMBEDDING_MODEL = "BAAI/bge-base-en-v1.5"
 
-# 1. LOAD ---- read each transcript, throw away the VTT timestamps
+
+# ============================================================
+# 1. LOAD
+# Read each transcript and remove VTT timestamps
+# ============================================================
+
 def load_transcripts():
-
     docs = []
+
     for path in glob.glob(f"{DATA_DIR}/*.vtt"):
+
         lines = []
-        for line in open(path):
-            line = line.strip()
-            if not line or line == "WEBVTT" or "-->" in line:
-                continue
-            lines.append(line)
+
+        with open(path, encoding="utf-8") as file:
+            for line in file:
+                line = line.strip()
+
+                if not line or line == "WEBVTT" or "-->" in line:
+                    continue
+
+                lines.append(line)
+
         text = " ".join(lines)
 
-        session = re.search(r"Session[ _]*(\d+)", path).group(1)
+        session_match = re.search(
+            r"Session[_ ]*(\d+)",
+            path,
+        )
 
-        docs.append(Document(page_content=text, metadata={"session": session}))
+        if session_match:
+            session = session_match.group(1)
+        else:
+            session = "unknown"
+
+        docs.append(
+            Document(
+                page_content=text,
+                metadata={"session": session},
+            )
+        )
 
     return docs
 
 
-# 2. BUILD ---- chunk, embed once, and keep it on disk so we don't re-embed
+# ============================================================
+# 2. BUILD / LOAD VECTOR STORE
+# ============================================================
+
 def load_store():
-    embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 
+    # Hugging Face embedding model
+    embeddings = HuggingFaceEmbeddings(
+        model_name=EMBEDDING_MODEL
+    )
+
+    # If vector store already exists, load it
     if os.path.exists(DB_DIR):
-        return Chroma(persist_directory=DB_DIR, embedding_function=embeddings)
 
+        return Chroma(
+            persist_directory=DB_DIR,
+            embedding_function=embeddings,
+        )
+
+    # Otherwise create the vector store
     docs = load_transcripts()
 
     chunks = RecursiveCharacterTextSplitter(
@@ -48,19 +90,39 @@ def load_store():
         chunk_overlap=150,
     ).split_documents(docs)
 
-    return Chroma.from_documents(chunks, embeddings, persist_directory=DB_DIR)
+    return Chroma.from_documents(
+        chunks,
+        embeddings,
+        persist_directory=DB_DIR,
+    )
 
+
+# ============================================================
+# 3. BUILD BASIC RETRIEVER
+# ============================================================
 
 def build_retriever():
-    return load_store().as_retriever(search_kwargs={"k": 5})
+
+    return load_store().as_retriever(
+        search_kwargs={"k": 5}
+    )
 
 
-# 3. TRY IT ---- python src/retriever.py
+# ============================================================
+# 4. TRY IT
+# ============================================================
+
 if __name__ == "__main__":
 
     retriever = build_retriever()
 
-    results = retriever.invoke("what is regression testing?")
-    
-    for r in results:
-        print(f"[Session {r.metadata['session']}] {r.page_content[:150]}...\n")
+    results = retriever.invoke(
+        "what is regression testing?"
+    )
+
+    for result in results:
+
+        print(
+            f"[Session {result.metadata['session']}] "
+            f"{result.page_content[:150]}...\n"
+        )

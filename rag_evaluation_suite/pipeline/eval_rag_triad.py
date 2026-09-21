@@ -1,63 +1,107 @@
 import json
+
 from dotenv import load_dotenv
 
 from deepeval import evaluate
 from deepeval.test_case import LLMTestCase
 from deepeval.metrics import (
-    FaithfulnessMetric,
-    AnswerRelevancyMetric,
-    ContextualRelevancyMetric,
+    ContextualRecallMetric,
+    ContextualPrecisionMetric,
 )
 
+from src.retriever import build_retriever
 from evals.groq_judge import GroqJudge
-from src.rag_pipeline import RagPipeline
+
 
 load_dotenv()
 
-GOLDEN_PATH = "goldens/faithfulness_dataset.json"   # reuse the queries
+
+# Configuration
+GOLDEN_PATH = "goldens/retriever_goldens.json"
 JUDGE_MODEL = "openai/gpt-oss-20b"
 THRESHOLD = 0.7
+TOP_K = 5
 
-# Use 3 for quick testing
+# Use 5 for quick testing
 # Change to 15 for the final trial
-TEST_LIMIT = 3
+TEST_LIMIT = 15
 
 
-# 1. LOAD queries (we only need the queries — context comes from the pipeline now)
-with open(GOLDEN_PATH,"r",encoding="utf-8") as f:
+# Load golden set
+with open(GOLDEN_PATH, "r", encoding="utf-8",) as f:
     goldens = json.load(f)
+
 
 goldens = goldens[:TEST_LIMIT]
 
 print(f"Running evaluation on {len(goldens)} test cases...")
 
+
 # Create Groq judge
 judge_model = GroqJudge(model_name=JUDGE_MODEL)
 
 
-# 2. RUN THE FULL PIPELINE per query, build a test case from LIVE output
-rag = RagPipeline()
+# Build retriever
+retriever = build_retriever()
+
+
+# Create test cases
 test_cases = []
 
-for g in goldens:
-    result = rag.invoke(g["query"])          # retrieve → rerank → generate
+for index, golden in enumerate(goldens, 1):
+
+    query = golden["query"]
+    print(f"\nRetrieving test case {index}: {query}")
+
+    retrieved = retriever.invoke(query)
+    retrieval_context = [doc.page_content for doc in retrieved]
 
     test_cases.append(
         LLMTestCase(
-            input=g["query"],
-            actual_output=result["answer"],       # what the generator produced
-            retrieval_context=result["context"],  # what the RETRIEVER returned
+            input=query,
+            expected_output=golden["ideal_answer"],
+            actual_output=(
+                "(generator not evaluated in this run)"
+            ),
+            retrieval_context=retrieval_context,
         )
     )
 
 
-# 3. THE THREE TRIAD METRICS
+# DeepEval metrics
 metrics = [
-    ContextualRelevancyMetric(threshold=THRESHOLD, model=judge_model, include_reason=True),
-    FaithfulnessMetric(threshold=THRESHOLD, model=judge_model, include_reason=True),
-    AnswerRelevancyMetric(threshold=THRESHOLD, model=judge_model, include_reason=True),
+
+    ContextualRecallMetric(
+        threshold=THRESHOLD,
+        model=judge_model,
+        include_reason=True,
+        async_mode=False,
+    ),
+
+    ContextualPrecisionMetric(
+        threshold=THRESHOLD,
+        model=judge_model,
+        include_reason=True,
+        async_mode=False,
+    ),
 ]
 
 
-# 4. EVALUATE
-evaluate(test_cases=test_cases, metrics=metrics)
+# Run evaluation
+print("\nStarting DeepEval...\n")
+
+evaluate(
+    test_cases=test_cases,
+    metrics=metrics,
+    hyperparameters={
+        "retriever": "reranker",
+        "embedding_model": (
+            "sentence-transformers/all-MiniLM-L6-v2"
+        ),
+        "chunk_size": 1000,
+        "chunk_overlap": 150,
+        "top_k": TOP_K,
+        "judge_model": JUDGE_MODEL,
+        "golden_set": GOLDEN_PATH,
+    },
+)
