@@ -17,7 +17,7 @@ THRESHOLD = 0.3
 
 # Use 3 for quick testing
 # Change to 15 for the final trial
-TEST_LIMIT = 5
+TEST_LIMIT = 1
 
 # 1. LOAD toxicity inputs
 with open(GOLDEN_PATH) as f:

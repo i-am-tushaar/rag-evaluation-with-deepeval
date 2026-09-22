@@ -1,107 +1,87 @@
-import json
-
+# eval_rag_pipeline.py
 from dotenv import load_dotenv
 
 from deepeval import evaluate
 from deepeval.test_case import LLMTestCase
 from deepeval.metrics import (
-    ContextualRecallMetric,
-    ContextualPrecisionMetric,
+    FaithfulnessMetric,
+    AnswerRelevancyMetric,
+    ContextualRelevancyMetric,
 )
 
-from src.retriever import build_retriever
+from src.rag_pipeline import RagPipeline
 from evals.groq_judge import GroqJudge
-
+from evals.harness import load_goldens, summarize_by_metric, print_summary
 
 load_dotenv()
 
-
-# Configuration
-GOLDEN_PATH = "goldens/retriever_goldens.json"
+GOLDEN_PATH = "goldens/faithfulness_dataset.json"   # reuse the queries
 JUDGE_MODEL = "openai/gpt-oss-20b"
 THRESHOLD = 0.7
-TOP_K = 5
 
-# Use 5 for quick testing
+# Use 3 for quick testing
 # Change to 15 for the final trial
-TEST_LIMIT = 15
+TEST_LIMIT = 3
 
 
-# Load golden set
-with open(GOLDEN_PATH, "r", encoding="utf-8",) as f:
-    goldens = json.load(f)
+def run(rag):
+    # 1. LOAD queries
+    goldens = load_goldens(GOLDEN_PATH)
 
+    # 2. RUN the injected pipeline
+    test_cases = []
 
-goldens = goldens[:TEST_LIMIT]
+    for g in goldens[:TEST_LIMIT]:
+        result = rag.invoke(g["query"])   # retrieve -> rerank -> generate
 
-print(f"Running evaluation on {len(goldens)} test cases...")
-
-
-# Create Groq judge
-judge_model = GroqJudge(model_name=JUDGE_MODEL)
-
-
-# Build retriever
-retriever = build_retriever()
-
-
-# Create test cases
-test_cases = []
-
-for index, golden in enumerate(goldens, 1):
-
-    query = golden["query"]
-    print(f"\nRetrieving test case {index}: {query}")
-
-    retrieved = retriever.invoke(query)
-    retrieval_context = [doc.page_content for doc in retrieved]
-
-    test_cases.append(
-        LLMTestCase(
-            input=query,
-            expected_output=golden["ideal_answer"],
-            actual_output=(
-                "(generator not evaluated in this run)"
-            ),
-            retrieval_context=retrieval_context,
+        test_cases.append(
+            LLMTestCase(
+                input=g["query"],
+                actual_output=result["answer"],
+                retrieval_context=result["context"],
+            )
         )
+
+    # 3. THE THREE TRIAD METRICS
+    judge_model = GroqJudge(model_name=JUDGE_MODEL)
+
+    metrics = [
+        ContextualRelevancyMetric(
+            threshold=THRESHOLD,
+            model=judge_model,
+            include_reason=True,
+        ),
+        FaithfulnessMetric(
+            threshold=THRESHOLD,
+            model=judge_model,
+            include_reason=True,
+        ),
+        AnswerRelevancyMetric(
+            threshold=THRESHOLD,
+            model=judge_model,
+            include_reason=True,
+        ),
+    ]
+
+    # 4. EVALUATE
+    result = evaluate(
+        test_cases=test_cases,
+        metrics=metrics,
+        hyperparameters={
+            "pipeline": "RagPipeline",
+            "judge_model": JUDGE_MODEL,
+            "golden_set": GOLDEN_PATH,
+            "test_limit": TEST_LIMIT,
+        },
     )
 
-
-# DeepEval metrics
-metrics = [
-
-    ContextualRecallMetric(
-        threshold=THRESHOLD,
-        model=judge_model,
-        include_reason=True,
-        async_mode=False,
-    ),
-
-    ContextualPrecisionMetric(
-        threshold=THRESHOLD,
-        model=judge_model,
-        include_reason=True,
-        async_mode=False,
-    ),
-]
+    return summarize_by_metric(result)
 
 
-# Run evaluation
-print("\nStarting DeepEval...\n")
+def run_local():
+    """Standalone convenience: build the pipeline, then run."""
+    return run(RagPipeline())
 
-evaluate(
-    test_cases=test_cases,
-    metrics=metrics,
-    hyperparameters={
-        "retriever": "reranker",
-        "embedding_model": (
-            "sentence-transformers/all-MiniLM-L6-v2"
-        ),
-        "chunk_size": 1000,
-        "chunk_overlap": 150,
-        "top_k": TOP_K,
-        "judge_model": JUDGE_MODEL,
-        "golden_set": GOLDEN_PATH,
-    },
-)
+
+if __name__ == "__main__":
+    print_summary("rag_pipeline", run_local())

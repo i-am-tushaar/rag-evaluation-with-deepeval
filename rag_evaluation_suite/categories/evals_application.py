@@ -16,7 +16,7 @@ load_dotenv()
 GOLDEN_PATH = "goldens/correctness_goldens.json"
 JUDGE_MODEL = "openai/gpt-oss-20b"
 THRESHOLD = 0.7
-TEST_LIMIT = 1
+TEST_LIMIT = 5
 
 
 def run(rag):
