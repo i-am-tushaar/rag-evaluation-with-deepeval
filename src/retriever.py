@@ -117,7 +117,7 @@ if __name__ == "__main__":
     retriever = build_retriever()
 
     results = retriever.invoke(
-        "what is regression testing?"
+        "what is MMLU?"
     )
 
     for result in results:
