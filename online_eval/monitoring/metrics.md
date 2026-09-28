@@ -1,80 +1,58 @@
-# Online Monitoring Metrics
+# Metrics
 
-## 1. Latency
+This file records the observed values for the metrics tracked on the
+`Customer Doubt Solver RAG - Online Evaluation` dashboard.
 
-Latency is the time required to process one request.
-
-Example:
-
-Request A = 1.2 seconds
-Request B = 1.5 seconds
-Request C = 2.0 seconds
-
-## Average Latency
-
-Average latency represents the mean latency across requests.
+***
 
 ## P95 Latency
 
-P95 tells us the latency value below which approximately 95% of requests fall.
+P95 latency represents the latency value below which approximately
+95% of requests fall.
 
-Example:
+### Observed Value
 
-P95 latency = 3 seconds
+**P95 Latency (latest reading):** `About 5.7 seconds`
 
-This means approximately 95% of requests completed within 3 seconds.
+**Peak P95 Latency:** `About 7.1 seconds`
 
-The remaining approximately 5% took longer.
+**Lowest P95 Latency:** `About 3.2 seconds`
 
-## P99 Latency
+**Monitoring Window:** `Last 1 hour (9/28/26)`
 
-P99 focuses on the slowest approximately 1% of requests.
+### Observation
 
-## 2. Cost
+* P95 latency started at about 3.2 seconds and rose steadily to about 4.7 seconds.
+* It then spiked to about 6.9 seconds, dropped to about 3.9 seconds, and rose again to about 4.8 seconds.
+* A second spike reached about 7.1 seconds, which touched the 7 second alert threshold.
+* After the second spike, latency settled between about 5.4 and 5.7 seconds.
+* The spikes are likely caused by the mix of queries and the multi step pipeline (retriever, reranker, and LLM generation).
 
-Cost represents the estimated model/API cost associated with requests.
+### Monitoring Purpose
+
+P95 latency is monitored to identify slow requests and understand the
+performance experienced by the majority of users.
+
+***
 
 ## Average Cost
 
-Average cost represents the average cost per request over the selected period.
+Average cost represents the average model and API cost per request over
+the selected monitoring period.
 
-## P95 Cost
+### Observed Value
 
-P95 cost shows the cost level below which approximately 95% of requests fall.
+**Average Cost:** `Less than $0.01 per request`
 
-## Total Cost
+**Monitoring Window:** `Last 1 hour (9/28/26)`
 
-Total cost is the sum of costs across all requests in the selected period.
+### Observation
 
-## 3. Quality Metrics
+* The average total cost stayed very close to $0.00 for the whole window.
+* The line moved only slightly and never reached the $0.01 mark on the chart.
+* This means each RAG request is very cheap to run.
 
-### Faithfulness
+### Monitoring Purpose
 
-Checks whether the answer is supported by the retrieved context.
-
-### Contextual Relevancy
-
-Checks whether the retrieved context is relevant to the user's question.
-
-### Answer Relevancy
-
-Checks whether the generated answer addresses the user's question.
-
-### Toxicity
-
-Checks whether the generated response contains toxic or harmful language.
-
-## Operational vs Quality Metrics
-
-Operational:
-
-- Latency
-- Cost
-- Errors
-
-Quality:
-
-- Faithfulness
-- Contextual Relevancy
-- Answer Relevancy
-- Toxicity
+Average cost is monitored to understand the typical cost of processing
+RAG requests and to catch unexpected cost increases early.

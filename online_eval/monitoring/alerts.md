@@ -1,67 +1,61 @@
-# LangSmith Alerts
+# Alerts
 
-## Purpose
+Alerts were configured in LangSmith for both latency and cost.
 
-Alerts notify the team when an important production metric crosses a defined threshold.
+***
 
-## Alert 1: High Latency
+## P95 Latency Alert
 
-Metric:
+### Threshold
 
-P95 latency
+```text
+P95 Latency >= 7 seconds
+```
 
-Condition:
+### Purpose
 
-P95 latency > defined threshold
+This alert notifies us when the slowest 5% of requests take 7 seconds
+or longer. It helps us react quickly when users start to feel the
+application is slow.
 
-Action:
+### Alert Status
 
-Send notification.
+**Status:** `___ (Active / Triggered / Resolved)`
 
-## Alert 2: High Cost
+**Notification Channel:** `___ (for example: Email, Slack, Webhook)`
 
-Metric:
+**Note:** The peak P95 latency of about 7.1 seconds reached the threshold once during the observed window.
 
-P95 cost
+***
 
-Condition:
+## Average Cost Alert
 
-P95 cost > defined threshold
+### Threshold
 
-Action:
+```text
+Average Cost >= $7
+```
 
-Send notification.
+### Purpose
 
-## Alert 3: Toxicity
+This alert notifies us when the average cost per request reaches $7
+or more. It helps us spot runaway spending, for example from very long
+prompts, too much retrieved context, or a switch to a more expensive model.
 
-Metric:
+### Alert Status
 
-Toxicity evaluation
+**Status:** `___ (Active / Triggered / Resolved)`
 
-Condition:
+**Notification Channel:** `___ (for example: Email, Slack, Webhook)`
 
-Toxicity exceeds the acceptable threshold.
+**Note:** The observed average cost is under $0.01, so this alert is not expected to trigger under current traffic.
 
-Action:
 
-Send notification.
+***
 
-## Alert 4: Quality Degradation
+## Alert Summary
 
-Metric:
-
-Faithfulness / Contextual Relevancy / Answer Relevancy
-
-Condition:
-
-Metric falls below the defined threshold.
-
-Action:
-
-Investigate affected traces.
-
-## Important
-
-Thresholds should be based on the application's actual baseline and SLO/quality requirements.
-
-Do not choose arbitrary thresholds without observing normal production behavior.
+| Alert | Metric | Condition | Threshold | Current Value | Peak Value | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| P95 Latency Alert | P95 Latency | Greater than or equal to | 7 seconds | About 5.7 seconds | About 7.1 seconds | ___ |
+| Average Cost Alert | Average Cost | Greater than or equal to | $7 | Less than $0.01 | Less than $0.01 | ___ |

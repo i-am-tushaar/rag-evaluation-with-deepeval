@@ -1,96 +1,79 @@
-# LangSmith Dashboard
+# Dashboard
 
 ## Dashboard Name
 
-RAG Online Evaluation Dashboard
+`Customer Doubt Solver RAG - Online Evaluation`
 
-## Purpose
+The dashboard was created in LangSmith to monitor the operational
+performance of the RAG application.
 
-The dashboard provides a single view of RAG application performance, cost and quality.
+***
 
-## Dashboard Panels
+## Dashboard Metrics
 
-### Panel 1: Latency P95
+The dashboard currently monitors:
 
-Metric:
+* **P95 Latency**
+* **Average Cost**
 
-P95 latency
+***
 
-Purpose:
+## Dashboard Settings
 
-Monitor slow production requests.
+* **Time Range:** Last 1 hour
+* **Observation Date:** 9/28/26
+* **Observed Period:** Approximately 8:40 PM to 9:20 PM
 
-### Panel 2: Cost P95
+***
 
-Metric:
+## P95 Latency
 
-P95 cost
+P95 latency represents the latency value below which approximately
+95% of requests fall.
 
-Purpose:
+### Observed Value
 
-Monitor unusually expensive requests.
+**P95 Latency (latest reading):** `About 5.7 seconds`
 
-### Panel 3: Toxicity
+**Peak P95 Latency:** `About 7.1 seconds`
 
-Metric:
+**Lowest P95 Latency:** `About 3.2 seconds`
 
-Toxicity evaluator score
+**Monitoring Window:** `Last 1 hour (9/28/26)`
 
-Purpose:
+### Observation
 
-Monitor unsafe or toxic responses.
+* P95 latency started at about 3.2 seconds and rose steadily to about 4.7 seconds.
+* It then spiked to about 6.9 seconds, dropped to about 3.9 seconds, and rose again to about 4.8 seconds.
+* A second spike reached about 7.1 seconds, which touched the 7 second alert threshold.
+* After the second spike, latency settled between about 5.4 and 5.7 seconds.
+* The spikes are likely caused by the mix of queries and the multi step pipeline (retriever, reranker, and LLM generation).
 
-### Panel 4: Faithfulness
+### Monitoring Purpose
 
-Metric:
+P95 latency is monitored to identify slow requests and understand the
+performance experienced by the majority of users.
 
-Faithfulness score
+***
 
-Purpose:
+## Average Cost
 
-Monitor whether answers are supported by retrieved context.
+Average cost represents the average model and API cost per request over
+the selected monitoring period.
 
-### Panel 5: Contextual Relevancy
+### Observed Value
 
-Metric:
+**Average Cost:** `Less than $0.01 per request`
 
-Contextual relevancy score
+**Monitoring Window:** `Last 1 hour (9/28/26)`
 
-Purpose:
+### Observation
 
-Monitor retrieval quality.
+* The average total cost stayed very close to $0.00 for the whole window.
+* The line moved only slightly and never reached the $0.01 mark on the chart.
+* This means each RAG request is very cheap to run.
 
-### Panel 6: Answer Relevancy
+### Monitoring Purpose
 
-Metric:
-
-Answer relevancy score
-
-Purpose:
-
-Monitor whether answers address user questions.
-
-## Dashboard Interpretation
-
-Example:
-
-Latency P95 increases
-→ Application may be becoming slower.
-
-Cost P95 increases
-→ Some requests may be consuming more tokens or using expensive models.
-
-Faithfulness decreases
-→ Generated answers may not be sufficiently supported by retrieved context.
-
-Contextual Relevancy decreases
-→ Retrieval may be returning less relevant documents.
-
-Toxicity increases
-→ More responses may contain problematic language.
-
-## Dashboard Location
-
-The actual dashboard is created and stored in LangSmith.
-
-This file documents the dashboard configuration.
+Average cost is monitored to understand the typical cost of processing
+RAG requests and to catch unexpected cost increases early.
