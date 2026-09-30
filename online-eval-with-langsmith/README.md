@@ -10,16 +10,25 @@ The online evaluation system monitors the RAG application after deployment using
 
 The online evaluation system monitors:
 
+**Pipeline Execution**
 - RAG pipeline execution
 - Retriever performance
 - Reranker execution
 - LLM generation
+
+**Operational Metrics**
 - Latency
 - Cost
+
+**Safety Metrics**
 - Toxicity
+
+**Quality Metrics**
 - Contextual Relevancy
 - Faithfulness
 - Answer Relevancy
+
+**Supporting Systems**
 - Production quality trends
 - Alerts
 - Evaluation datasets
@@ -61,20 +70,24 @@ LangSmith traces the RAG pipeline and important components such as:
 
 ### 2. Monitoring
 
-The following operational metrics are monitored:
+Operational metrics are monitored to track system performance and cost:
 
-- Latency
+**Latency**
 - P95 latency
 - P99 latency
-- Cost
+
+**Cost**
 - Average cost
 - P95 cost
 
 ### 3. Online Evaluation
 
-Production traces are evaluated using:
+Production traces are evaluated across two categories:
 
+**Safety Metrics**
 - Toxicity
+
+**Quality Metrics**
 - Contextual Relevancy
 - Faithfulness
 - Answer Relevancy
@@ -83,14 +96,19 @@ Production traces are evaluated using:
 
 A LangSmith dashboard is used to visualize:
 
+**Operational**
 - Latency P95
 - Cost P95
+
+**Safety**
 - Toxicity
-- RAG Triad metrics
+
+**Quality**
+- RAG Triad metrics (Contextual Relevancy, Faithfulness, Answer Relevancy)
 
 ### 5. Alerts
 
-Alerts are configured for important operational or quality problems.
+Alerts are configured for important operational, safety, or quality problems.
 
 ### 6. Dataset
 
