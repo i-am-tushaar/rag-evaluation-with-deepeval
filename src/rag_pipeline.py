@@ -31,7 +31,7 @@ class RagPipeline:
 if __name__ == "__main__":
     
     rag = RagPipeline()
-    result = rag.invoke("Why do we need Evalaution?")
+    result = rag.invoke("What is LLM Leaderboards and how to select it?")
     print("QUERY:  ", result["query"])
     print("ANSWER: ", result["answer"])
     print("\nCONTEXT CHUNKS:")
